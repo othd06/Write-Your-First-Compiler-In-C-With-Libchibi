@@ -1,0 +1,92 @@
+<program> ::= <object>*;
+
+<object> ::= <definition>;
+
+<definition> ::= <l_paren> <keyword_define> <keyword_proc>
+                 <proc_definition> <r_paren>;
+
+<proc_definition> ::= <l_paren> <identifier> <proc_type>
+                      <proc_body> <r_paren>;
+
+<proc_body> ::= <l_paren> <keyword_body> <statement>*
+                <r_paren>;
+
+<statement> ::= <l_paren> <keyword_return> <value_literal>
+                <r_paren>;
+
+<type> ::= <proc_type> | <base_type>;
+
+<proc_type> ::= <l_paren> <type> <l_paren> <declaration>*
+                <r_paren> <r_paren>;
+
+<base_type> ::= <keyword_bool> | <keyword_i8> | <keyword_i16> |
+                <keyword_i32> | <keyword_i64> | <keyword_u8> |
+                <keyword_u16> | <keyword_u32> | <keyword_u64> |
+                <keyword_f32> | <keyword_f64> | <keyword_f80> |
+                <keyword_string>;
+
+<declaration> ::= <l_paren> (<keyword_i8> | <keyword_i16>
+                  | <keyword_i32> | <keyword_i64> | <keyword_u8> |
+                  <keyword_u16> | <keyword_u32> | <keyword_u64>)
+                  <identifier> <r_paren>;
+<declaration> ::= <l_paren> (<keyword_f32> | <keyword_f64> |
+                  <keyword_f80>) <identifier> <r_paren>;
+<declaration> ::= <l_paren> <keyword_bool> <identifier>
+                  <r_paren>;
+<declaration> ::= <l_paren> <keyword_string> <identifier>
+                  <r_paren>;
+
+<value_literal> ::= <l_paren> (<keyword_i8> | <keyword_i16>
+                  | <keyword_i32> | <keyword_i64> | <keyword_u8> |
+                  <keyword_u16> | <keyword_u32> | <keyword_u64>)
+                  <integer_literal> <r_paren>;
+<value_literal> ::= <l_paren> (<keyword_f32> |
+                    <keyword_f64> | <keyword_f80>)
+                   (<integer_literal> | <decimal_literal>)
+                   <r_paren>;
+<value_literal> ::= <l_paren> <keyword_bool> <bool_literal>
+                    <r_paren>;
+<value_literal> ::= <l_paren> <keyword_string>
+                    <string_literal> <r_paren>;
+
+=====================================================================
+
+<l_paren> ::= "(";
+<r_paren> ::= ")";
+
+<keyword_define> ::= "define";
+<keyword_proc> ::= "proc";
+<keyword_body> ::= "body";
+
+<keyword_bool> ::= "bool";
+<keyword_i8>  ::= "i8";
+<keyword_i16> ::= "i16";
+<keyword_i32> ::= "i32";
+<keyword_i64> ::= "i64";
+<keyword_u8>  ::= "u8";
+<keyword_u16> ::= "u16";
+<keyword_u32> ::= "u32";
+<keyword_u64> ::= "u64";
+<keyword_f32> ::= "f32";
+<keyword_f64> ::= "f64";
+<keyword_f80> ::= "f80";
+<keyword_string> ::= "string";
+
+<identifier> ::= <letter> (<letter> | <digit> | "_")*;
+
+<integer_literal> ::= <digit>+;
+<decimal_literal> ::= <digit>+ "." <digit>+;
+<bool_literal> ::= "true" | "false";
+<string_literal> ::= "\"" "{any non-quote terminal}"* "\"";
+
+<letter> ::= "A" | "B" | "C" | "D" | "E" | "F" | "G" |
+             "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | 
+             "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" |
+             "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" |
+             "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" |
+             "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" |
+             "v" | "w" | "x" | "y" | "z";
+<digit> ::= "0" | "1" | "2" | "3" | "4" |
+            "5" | "6" | "7" | "8" | "9";
+
+<whitespace> ::= (" " | "\t" | "\n" | "\r")*;
