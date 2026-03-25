@@ -21,7 +21,7 @@ This is the form that would be most idiomatic to write in however, since I imagi
 As we can see the outer list represents an object (not in the OOP sense). In this case, it is a function definition. We see that the first keyword define is used to signify the kind of object which is a definition and the second signifies that it is a procedure definition (since the lisp family is so closely associated with functional programming we will reserve the name "function" for so-called pure functions which guarantee they will not change anything outside of the function's own scope, a feature we will introduce later in the book). The final element of the outer list is the function itself. We can see that a function is a list itself that comprises 3 elements, the name of the function, the type of the function (itself a nested list containing the i32 return type and an empty list of parameters) and the body of the function which comprises the word body followed by a list of statements, in this case a single return statement.
 
 We can start to think about how we might define this particular statement in EBNF. I would propose we do something like the following:
-```
+```ebnf
 <program> ::= (<object> <whitespace>)*;
 
 <object> ::= <definition>;
@@ -140,7 +140,7 @@ Take note of line down the middle. Notice how I don't use any terminals above th
 [r_paren]
 ```
 Then we will parse these tokens to create the AST in the parser stage. At this point our tokens, the non-terminal symbols below the line, effectively become the terminals for the parser above the line with the output of the tokeniser _becoming_ the input string of the parser. In fact, since we do our parsing in two stages like this, we can simply not emit any whitespace tokens from the tokeniser meaning we can simplify the parser to something like this: 
-```
+```ebnf
 <program> ::= <object>*;
 
 <object> ::= <definition>;
