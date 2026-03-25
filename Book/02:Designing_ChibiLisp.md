@@ -5,11 +5,11 @@ In the last chapter we learned how to use the EBNF notation to describe context-
 Just a note, this chapter is going to be a bit more dense than the last two. Don't worry; you've got it. I believe in you. Just take it slowly, and don't be afraid to read something again if it doesn't click the first time.
 
 As you may know already the heart of any lisp-family language is the S-expression, a type of nestable list enclosed in parenthesis. This will be no different for our language either. Let's take a look at the most basic program in our language, a program that exits with a custom error code (in this case 69), so we can start to think about how we might define it.
-```
+```lisp
 (define proc (main (i32 ()) (body (return (i32 69)))))
 ```
 This is the form that would be most idiomatic to write in however, since I imagine that most readers will likely not have read or used lisp before (and markdown doesn't support bracket colouring) let's lay it out on different lines to show how it works in a more C-like fashion:
-```
+```lisp
 (define proc 
     (main (i32 ()) 
         (body 
