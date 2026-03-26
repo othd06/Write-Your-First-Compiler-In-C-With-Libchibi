@@ -2,16 +2,20 @@
 
 <object> ::= <definition>;
 
-<definition> ::= <l_paren> <keyword_define> <keyword_proc>
-                 <proc_definition> <r_paren>;
+<definition> ::= <proc_definition>;
 
-<proc_definition> ::= <l_paren> <identifier> <proc_type>
+<proc_definition> ::= <l_paren> <keyword_define> <keyword_proc>
+                 <proc_definition_inner> <r_paren>;
+
+<proc_definition_inner> ::= <l_paren> <identifier> <proc_type>
                       <proc_body> <r_paren>;
 
 <proc_body> ::= <l_paren> <keyword_body> <statement>*
                 <r_paren>;
 
-<statement> ::= <l_paren> <keyword_return> <value_literal>
+<statement> ::= <return_statement>
+
+<return_statement> ::= <l_paren> <keyword_return> <value_literal>
                 <r_paren>;
 
 <type> ::= <proc_type> | <base_type>;

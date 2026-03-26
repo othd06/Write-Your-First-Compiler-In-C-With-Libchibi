@@ -1,0 +1,54 @@
+<program> ::= <object>* "eof";
+
+<object> ::= <definition>;
+
+<definition> ::= <proc_definition>;
+
+<proc_definition> ::= "l_paren" "keyword_define" "keyword_proc"
+                 <proc_definition_inner> "r_paren";
+
+<proc_definition_inner> ::= "l_paren" "identifier" <proc_type>
+                      <proc_body> "r_paren";
+
+<proc_body> ::= "l_paren" "keyword_body" <statement>*
+                "r_paren";
+
+<statement> ::= <return_statement>
+
+<return_statement> ::= "l_paren" "keyword_return" <value_literal>
+                "r_paren";
+
+<type> ::= <proc_type> | <base_type>;
+
+<proc_type> ::= "l_paren" <type> "l_paren" <declaration>*
+                "r_paren" "r_paren";
+
+<base_type> ::= "keyword_bool" | "keyword_i8" | "keyword_i16" |
+                "keyword_i32" | "keyword_i64" | "keyword_u8" |
+                "keyword_u16" | "keyword_u32" | "keyword_u64" |
+                "keyword_f32" | "keyword_f64" | "keyword_f80" |
+                "keyword_string";
+
+<declaration> ::= "l_paren" ("keyword_i8" | "keyword_i16"
+                  | "keyword_i32" | "keyword_i64" | "keyword_u8" |
+                  "keyword_u16" | "keyword_u32" | "keyword_u64")
+                  "identifier" "r_paren";
+<declaration> ::= "l_paren" ("keyword_f32" | "keyword_f64" |
+                  "keyword_f80") "identifier" "r_paren";
+<declaration> ::= "l_paren" "keyword_bool" "identifier"
+                  "r_paren";
+<declaration> ::= "l_paren" "keyword_string" "identifier"
+                  "r_paren";
+
+<value_literal> ::= "l_paren" ("keyword_i8" | "keyword_i16"
+                  | "keyword_i32" | "keyword_i64" | "keyword_u8" |
+                  "keyword_u16" | "keyword_u32" | "keyword_u64")
+                  "integer_literal" "r_paren";
+<value_literal> ::= "l_paren" ("keyword_f32" |
+                    "keyword_f64" | "keyword_f80")
+                   ("integer_literal" | "decimal_literal")
+                   "r_paren";
+<value_literal> ::= "l_paren" "keyword_bool" "bool_literal"
+                    "r_paren";
+<value_literal> ::= "l_paren" "keyword_string"
+                    "string_literal" "r_paren";

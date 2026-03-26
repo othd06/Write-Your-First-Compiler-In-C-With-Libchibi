@@ -26,11 +26,13 @@ We can start to think about how we might define this particular statement in EBN
 
 <object> ::= <definition>;
 
-<definition> ::= <l_paren> <whitespace> <keyword_define>
-                <whitespace> <keyword_proc> <whitespace>
-                <proc_definition> <r_paren>;
+<definition> ::= <proc_definition>;
 
-<proc_definition> ::= <l_paren> <whitespace> <identifier>
+<proc_definition> ::= <l_paren> <whitespace> <keyword_define>
+                <whitespace> <keyword_proc> <whitespace>
+                <proc_definition_inner> <r_paren>;
+
+<proc_definition_inner> ::= <l_paren> <whitespace> <identifier>
                       <whitespace> <proc_type> <whitespace>
                       <proc_body> <whitespace> <r_paren>;
 
@@ -38,7 +40,9 @@ We can start to think about how we might define this particular statement in EBN
                 <whitespace> (<statement> <whitespace>)*
                 <r_paren>;
 
-<statement> ::= <l_paren> <whitespace> <keyword_return>
+<statement> ::= <return_statement>
+
+<return_statement> ::= <l_paren> <whitespace> <keyword_return>
                 <whitespace> <value_literal> <whitespace>
                 <r_paren>;
 
@@ -145,16 +149,20 @@ Then we will parse these tokens to create the AST in the parser stage. At this p
 
 <object> ::= <definition>;
 
-<definition> ::= <l_paren> <keyword_define> <keyword_proc>
-                 <proc_definition> <r_paren>;
+<definition> ::= <proc_definition>;
 
-<proc_definition> ::= <l_paren> <identifier> <proc_type>
+<proc_definition> ::= <l_paren> <keyword_define> <keyword_proc>
+                 <proc_definition_inner> <r_paren>;
+
+<proc_definition_inner> ::= <l_paren> <identifier> <proc_type>
                       <proc_body> <r_paren>;
 
 <proc_body> ::= <l_paren> <keyword_body> <statement>*
                 <r_paren>;
 
-<statement> ::= <l_paren> <keyword_return> <value_literal>
+<statement> ::= <return_statement>
+
+<return_statement> ::= <l_paren> <keyword_return> <value_literal>
                 <r_paren>;
 
 <type> ::= <proc_type> | <base_type>;
