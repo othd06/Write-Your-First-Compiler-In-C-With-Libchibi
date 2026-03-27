@@ -1,4 +1,4 @@
-A book to teach you how to write your first compiler with the [Libchibi](https://github.com/othd06/libchibi) library.#
+A book to teach you how to write your first compiler with the [Libchibi](https://github.com/othd06/libchibi) library.
 
 In this book we will go through the process of designing and implementing a custom language, ChibiLisp, learning the skills you need to do so as we go along.
 
