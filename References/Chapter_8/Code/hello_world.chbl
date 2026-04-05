@@ -1,0 +1,15 @@
+
+(extern proc
+    (puts
+        (i32 ((string input)))
+    )
+)
+
+(define proc
+    (main (i32 ())
+        (body
+            (puts (string "Hello World"))
+            (return (i32 0))
+        )
+    )
+)

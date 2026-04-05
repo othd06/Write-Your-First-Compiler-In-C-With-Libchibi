@@ -40,7 +40,7 @@ Well, we're obviously going to need a way to print to the console and for now I'
   *  memory allocation
   *  sizeof
 
-That seems like a lot but as you'll see it's actually no more complex than what we have already built. In fact, that is the exact reason I've chosen to introduce so many new features at once; there's almost nothing here that you can't already do with what you've learned up to this point.
+That seems like a lot but as you'll see it's actually no more complex than what we have already built. In fact, that is the exact reason I've chosen to introduce so many new features at once; there's almost nothing here that you can't already do with what you've learned up to this point. Indeed, both this chapter and the next will kind of act as a 'stress-test' for everything you've learned so far.
 
 Also note that, for the moment, our feature set is oriented much more towards writing C-style imperative code. Later in the book we'll introduce more features for supporting functional code.
 
@@ -569,7 +569,7 @@ Note that we still dereference from a value rather than a pointer value because 
 We can then add this symbol to our parser grammar:
 ```EBNF
 <allocation> ::= "l_paren" "keyword_allocate" <expression>
-                 "keyword_of" <expression> "r_paren";
+                 "keyword_of" <type> "r_paren";
 <free_statement> ::= "l_paren" "keyword_free" <expression>
                      "r_paren";
 ```
