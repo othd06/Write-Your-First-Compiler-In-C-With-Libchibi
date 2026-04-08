@@ -42,6 +42,9 @@
 <keyword_of> ::= "of";
 <keyword_free> ::= "free";
 <keyword_sizeof> ::= "sizeof";
+<keyword_cast> ::= "cast";
+
+<comment> ::= ";"* {any non-semicolon literal}* ";"*;
 
 <keyword_bool> ::= "bool";
 <keyword_i8>  ::= "i8";

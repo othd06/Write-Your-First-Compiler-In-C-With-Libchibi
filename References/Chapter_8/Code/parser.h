@@ -319,12 +319,8 @@ Node_Option parse_shl_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
     
-    Type shl_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(shl_type))
-        shl_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_shl_node(shl_type, lhs.value, rhs.value, 0, 0)
+        create_shl_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -338,12 +334,8 @@ Node_Option parse_shr_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
     
-    Type shr_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(shr_type))
-        shr_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_shr_node(shr_type, lhs.value, rhs.value, 0, 0)
+        create_shr_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -358,12 +350,8 @@ Node_Option parse_bit_and_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type and_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(and_type))
-        and_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_and_node(and_type, lhs.value, rhs.value, 0, 0)
+        create_bit_and_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -378,12 +366,8 @@ Node_Option parse_bit_or_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type or_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(or_type))
-        or_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_or_node(or_type, lhs.value, rhs.value, 0, 0)
+        create_bit_or_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -412,12 +396,8 @@ Node_Option parse_bit_xor_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type xor_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(xor_type))
-        xor_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_xor_node(xor_type, lhs.value, rhs.value, 0, 0)
+        create_bit_xor_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -460,7 +440,7 @@ Node_Option parse_log_not_expr() {
     Expect(Node_Option, tokens.data[idx++].kind == TOK_KEYWORD_NOT);
     Node_Option expression = parse_expression();
     Expect(Node_Option, expression.present);
-    Node_Option rhs = parse_expression();
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
     Node_Option output = Just(Node_Option,
         create_not_node(expression.value, 0, 0)
@@ -497,12 +477,8 @@ Node_Option parse_sub_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type sub_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(sub_type))
-        sub_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_sub_node(sub_type, lhs.value, rhs.value, 0, 0)
+        create_sub_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -516,12 +492,8 @@ Node_Option parse_mul_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type mul_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(mul_type))
-        mul_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_mul_node(mul_type, lhs.value, rhs.value, 0, 0)
+        create_mul_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -535,12 +507,8 @@ Node_Option parse_div_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type div_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(div_type))
-        div_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_div_node(div_type, lhs.value, rhs.value, 0, 0)
+        create_div_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -554,12 +522,8 @@ Node_Option parse_mod_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type mod_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(mod_type))
-        mod_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_mod_node(mod_type, lhs.value, rhs.value, 0, 0)
+        create_mod_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -573,12 +537,8 @@ Node_Option parse_add_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type add_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(add_type))
-        add_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_add_node(add_type, lhs.value, rhs.value, 0, 0)
+        create_add_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -641,6 +601,25 @@ Node_Option parse_proc_call() {
     //The function call was correctly parsed but the function doesn't exist so we will produce a fatal error
     fprintf(stderr, "Error: implicit declaration of function %s\n", name);
     exit(1);
+}
+
+Node_Option parse_cast() {
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_L_PAREN);
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_KEYWORD_CAST);
+    Type_Option target_type = parse_type();
+    Expect(Node_Option, target_type.present);
+    Node_Option expression = parse_expression();
+    Expect(Node_Option, expression.present);
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
+
+    Node output_node = create_c_cast_node(
+        target_type.value,
+        expression.value,
+        0,
+        0
+    );
+    Node_Option output = Just(Node_Option, output_node);
+    return output;
 }
 
 Node_Option parse_expression() {
@@ -759,6 +738,10 @@ Node_Option parse_expression() {
     if (output.present) {
         return output;
     } else idx = current_idx;
+    output = parse_cast();
+    if (output.present) {
+        return output;
+    } else idx = current_idx;
 
     return (Node_Option)Nothing;
 }
@@ -809,9 +792,9 @@ Type_Option parse_base_type() {
         TOK_KEYWORD_I8, TOK_KEYWORD_BOOL};
     BaseType base_types[] = {
         BTY_LDOUBLE, BTY_DOUBLE,
-        BTY_FLOAT, BTY_LONG,
-        BTY_INT, BTY_SHORT,
-        BTY_CHAR, BTY_LONG,
+        BTY_FLOAT, BTY_ULONG,
+        BTY_UINT, BTY_USHORT,
+        BTY_UCHAR, BTY_LONG,
         BTY_INT, BTY_SHORT,
         BTY_CHAR, BTY_INT};
     //BaseType is a type provided by Libchibi to represent base types
@@ -830,7 +813,15 @@ Type_Option parse_base_type() {
 
 Type_Option parse_proc_type(char_ptr_Seq* arg_names) {
     Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
-    Type_Option return_type = parse_type();
+    Type_Option return_type;
+    if (tokens.data[idx].kind == TOK_KEYWORD_VOID) {
+        idx++;
+        return_type = Just(Type_Option,
+            create_base_type(BTY_VOID)
+        );
+    } else {
+        return_type = parse_type();
+    }
     Expect(Type_Option, return_type.present);
     Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
 
@@ -976,9 +967,13 @@ Node_Option parse_var_assign_statement() {
         );
     }
     Node_Option output = Just(Node_Option,
-        create_ass_node(
-            var_node,
-            assignment.value,
+        create_expression_stmt_node(
+            create_ass_node(
+                var_node,
+                assignment.value,
+                0,
+                0
+            ),
             0,
             0
         )
@@ -1038,8 +1033,8 @@ Node_Option parse_free_statement() {
 }
 
 Node_Option parse_while_loop(char_ptr_Seq* local_names, TypeList* local_types) {
-    append(UniqueLabel_Seq, break_labels, (UniqueLabel)empty_label);
-    append(UniqueLabel_Seq, continue_labels, (UniqueLabel)empty_label);
+    append(UniqueLabel_Seq, break_labels, create_unique_label());
+    append(UniqueLabel_Seq, continue_labels, create_unique_label());
     bool succeeded = true;
     if (tokens.data[idx++].kind != TOK_L_PAREN) goto failed;
     if (tokens.data[idx++].kind != TOK_KEYWORD_WHILE) goto failed;
@@ -1097,6 +1092,18 @@ Node_Option parse_body_statement(char_ptr_Seq* local_names, TypeList* local_type
     return output;
 }
 
+Type_Option parse_var_declaration(char** name){
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_KEYWORD_VAR);
+    char* var_name;
+    //save the name to a temporary variable until every expect is done
+    Type_Option var_type = parse_declaration(&var_name);
+    Expect(Type_Option, var_type.present);
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_R_PAREN);
+    *name = var_name;
+    return var_type;
+}
+
 Node_Option parse_statement(char_ptr_Seq* local_names, TypeList* local_types) {
     int current_idx = idx;
     Node_Option output;
@@ -1113,7 +1120,7 @@ Node_Option parse_statement(char_ptr_Seq* local_names, TypeList* local_types) {
         return output;
     } else idx = current_idx;
     char* name;
-    Type_Option var_type = parse_declaration(&name);
+    Type_Option var_type = parse_var_declaration(&name);
     if (var_type.present) {
         //we need to construct the variable here since parse_var_declaration is responsible for producing either a local var or a global var depending on where it is called from.
         append(char_ptr_Seq, *local_names, name);
@@ -1301,18 +1308,6 @@ Object_Option parse_proc_declaration(){
     } else idx = current_idx;
 
     return (Object_Option)Nothing;
-}
-
-Type_Option parse_var_declaration(char** name){
-    Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
-    Expect(Type_Option, tokens.data[idx++].kind == TOK_KEYWORD_VAR);
-    char* var_name;
-    //save the name to a temporary variable until every expect is done
-    Type_Option var_type = parse_declaration(&var_name);
-    Expect(Type_Option, var_type.present);
-    Expect(Type_Option, tokens.data[idx++].kind == TOK_R_PAREN);
-    *name = var_name;
-    return var_type;
 }
 
 Object_Option parse_object_declaration(){

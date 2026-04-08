@@ -1,0 +1,187 @@
+
+
+(extern proc
+    (puts
+        (i32 ((string input)))
+    )
+)
+
+(extern proc 
+    (InitWindow
+        (void ((i32 width) (i32 height) (string title)))
+    )
+)
+
+(extern proc
+    (CloseWindow
+        (void ())
+    )
+)
+
+(extern proc
+    (WindowShouldClose
+        (i32 ())
+    )
+)
+
+(extern proc
+    (BeginDrawing
+        (void ())
+    )
+)
+
+(extern proc
+    (EndDrawing
+        (void ())
+    )
+)
+
+(extern proc
+    (ClearBackground
+        (void ((u32 colour)))
+    )
+)
+
+(extern proc
+    (DrawCircle
+        (void ((i32 x) (i32 y) (f32 radius) (u32 colour)))
+    )
+)
+
+(extern proc
+    (DrawLine
+        (void ((i32 startX) (i32 startY) (i32 endX) (i32 endY) (u32 colour)))
+    )
+)
+
+(extern proc
+    (SetTargetFPS
+        (void ((i32 fps)))
+    )
+)
+
+(extern proc
+    (sqrtf
+        (f32 ((f32 x)))
+    )
+)
+
+
+(define var (i32 anchor_x) (i32 640))
+(define var (i32 anchor_y) (i32 550))
+(define var (f32 anchor_radius) (f32 20))
+
+(define var (f32 ball_x) (f32 640))
+(define var (f32 ball_y) (f32 150))
+(define var (f32 ball_dx) (f32 300))
+(define var (f32 ball_dy) (f32 0))
+
+(define var (f32 ball_radius) (f32 35))
+
+(define var (f32 rod_len) (f32 400))
+(define var (f32 rod_len_nominal) (f32 400))
+
+(define var (f32 gravity_strength) (f32 250))
+
+(var (f32 dt))
+
+(define proc
+    (do_physics (void ())
+        (body
+            (assign rod_len
+                (sqrtf 
+                    (+ 
+                        (* (- (cast f32 anchor_y) ball_y) (- (cast f32 anchor_y) ball_y)) 
+                        (* (- (cast f32 anchor_x) ball_x) (- (cast f32 anchor_x) ball_x))
+                    )
+                )
+            )
+            (var (f32 force_x))
+            (var (f32 force_y))
+            (assign force_y (- (f32 0) gravity_strength))
+            (assign force_x (f32 0))
+            (var (f32 cos_theta))
+            (assign cos_theta
+                (/ (- (cast f32 anchor_y) ball_y) rod_len)
+            )
+            (var (f32 tension_strength))
+            (var (f32 tension_centripetal))
+            (assign tension_centripetal
+                (/ (+ (* ball_dx ball_dx) (* ball_dy ball_dy)) rod_len)
+            )
+            (assign tension_strength
+                (+
+                    (* gravity_strength cos_theta)
+                    tension_centripetal
+                )
+            )
+            (if (< tension_strength (f32 0)) (assign tension_strength (- (f32 0) tension_strength)))
+            (var (f32 tension_y))
+            (var (f32 tension_x))
+            (assign tension_y
+                (*
+                    tension_strength
+                    (/ (- (cast f32 anchor_y) ball_y) rod_len_nominal)
+                )
+            )
+            (assign tension_x
+                (*
+                    tension_strength
+                    (/ (- (cast f32 anchor_x) ball_x) rod_len_nominal)
+                )
+            )
+            (assign force_x (+ force_x tension_x))
+            (assign force_y (+ force_y tension_y))
+            (assign ball_dx (+ ball_dx (* dt force_x)))
+            (assign ball_dy (+ ball_dy (* dt force_y)))
+            (assign ball_x (+ ball_x (* dt ball_dx)))
+            (assign ball_y (+ ball_y (* dt ball_dy)))
+        )
+    )
+)
+
+(define proc
+    (loop_body (void ())
+        (body
+            (BeginDrawing)
+            (do_physics)
+            (ClearBackground (u32 4281808695))
+            (DrawLine
+                anchor_x
+                (- (i32 720) anchor_y)
+                (cast i32 ball_x)
+                (- (i32 720) (cast i32 ball_y))
+                (u32 4289374890)
+            )
+            (DrawCircle
+                anchor_x
+                (- (i32 720) anchor_y)
+                anchor_radius
+                (u32 4278255615)
+            )
+            (DrawCircle
+                (cast i32 ball_x)
+                (- (i32 720) (cast i32 ball_y))
+                ball_radius
+                (u32 4294901760)
+            )
+            (EndDrawing)
+        )
+    )
+)
+
+(define proc 
+    (main (i32 ())
+        (body
+            (InitWindow (i32 1280) (i32 720) (string "pendulum"))
+            (SetTargetFPS (i32 60))
+            (assign dt (/ (f32 1) (f32 60)))
+            (while (= (WindowShouldClose) (i32 0))
+                (loop_body)
+            )
+            (CloseWindow)
+            (return (i32 0))
+        )
+    )
+)
+

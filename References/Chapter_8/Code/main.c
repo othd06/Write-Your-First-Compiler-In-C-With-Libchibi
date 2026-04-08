@@ -7,16 +7,22 @@
 
 
 int main(int argc, char* argv[]) {
-    int dashC = 0;
+    int flagC = 0;
+    bool compile_only = false;
+    bool assemble_only = false;
     if (argc == 4 && strcmp(argv[1], "-c") == 0) {
-        dashC = 1;
+        flagC += 1;
+        compile_only = true;
+    } else if (argc == 4 && strcmp(argv[1], "-a") == 0) {
+        flagC += 1;
+        assemble_only = true;
     } else if (argc != 3) {
         fprintf(stderr, "Error, incorrect arguments\n");
         fprintf(stderr, "Usage: ChibiLisp <source file> <executable name>\n");
         return 1;
     }
-    char* filepath = argv[1+dashC];
-    char* executable_name = argv[2+dashC];
+    char* filepath = argv[1+flagC];
+    char* executable_name = argv[2+flagC];
 
     //open the file
     FILE* source_file = fopen(filepath, "r");
@@ -38,6 +44,19 @@ int main(int argc, char* argv[]) {
 
     ObjectList program = parse_program(tokenise(source_string));
 
+    resection_objects(program);
+    DebugFile df = {.file_name = filepath, .file_num = 0};
+    register_debug_files(&df, 1);
+
+    if (compile_only) {
+        cProg(program, executable_name);
+        return 0;
+    }
+    if (assemble_only) {
+        aProg(program, executable_name);
+        return 0;
+    }
+
     char object_template[] = "/tmp/chibilisp-XXXXXX.o";
     int fd = mkstemps(object_template, 2);
     if (fd < 0) {
@@ -46,14 +65,6 @@ int main(int argc, char* argv[]) {
     }
     close(fd);
 
-    resection_objects(program);
-    DebugFile df = {.file_name = filepath, .file_num = 0};
-    register_debug_files(&df, 1);
-
-    if (dashC) {
-        cProg(program, executable_name);
-        return 0;
-    }
     aProg(program, object_template);
 
     pid_t pid = fork();

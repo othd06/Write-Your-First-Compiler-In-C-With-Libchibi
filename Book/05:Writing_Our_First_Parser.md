@@ -389,9 +389,9 @@ Type_Option parse_base_type() {
         TOK_KEYWORD_I8, TOK_KEYWORD_BOOL};
     BaseType base_types[] = {
         BTY_LDOUBLE, BTY_DOUBLE,
-        BTY_FLOAT, BTY_LONG,
-        BTY_INT, BTY_SHORT,
-        BTY_CHAR, BTY_LONG,
+        BTY_FLOAT, BTY_ULONG,
+        BTY_UINT, BTY_USHORT,
+        BTY_UCHAR, BTY_LONG,
         BTY_INT, BTY_SHORT,
         BTY_CHAR, BTY_INT};
     //BaseType is a type provided by Libchibi to represent base types

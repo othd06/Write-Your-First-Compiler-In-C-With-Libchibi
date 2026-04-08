@@ -41,6 +41,9 @@ The first thing to do is to update our tokeniser, so let's remind ourselves of o
 <keyword_of> ::= "of";
 <keyword_free> ::= "free";
 <keyword_sizeof> ::= "sizeof";
+<keyword_cast> ::= "cast";
+
+<comment> ::= ";" {any non-semicolon literal}* ";";
 ```
 So let's add each of these to our token kind enum:
 ```c
@@ -92,6 +95,7 @@ typedef enum {
     TOK_KEYWORD_OF,
     TOK_KEYWORD_FREE,
     TOK_KEYWORD_SIZEOF,
+    TOK_KEYWORD_CAST,
     TOK_L_PAREN,
     TOK_R_PAREN,
     TOK_SYMBOL_PLUS,
@@ -118,7 +122,7 @@ char* keyword_strings[] = {"string", "f80", "f64",
     "else", "while", "break", "continue", "log", "and",
     "or", "not", "xor", "bit", "shl", "shr", "void",
     "ptr", "to", "from", "allocate", "of", "free",
-    "sizeof"};
+    "sizeof", "cast"};
 TokenKind keyword_kinds[] = {TOK_KEYWORD_STRING,
     TOK_KEYWORD_F80, TOK_KEYWORD_F64,
     TOK_KEYWORD_F32, TOK_KEYWORD_U64,
@@ -140,7 +144,7 @@ TokenKind keyword_kinds[] = {TOK_KEYWORD_STRING,
     TOK_KEYWORD_PTR, TOK_KEYWORD_TO,
     TOK_KEYWORD_FROM, TOK_KEYWORD_ALLOCATE,
     TOK_KEYWORD_OF, TOK_KEYWORD_FREE,
-    TOK_KEYWORD_SIZEOF};
+    TOK_KEYWORD_SIZEOF, TOK_KEYWORD_CAST};
 ```
 And our existing keyword identification code will handle it all correctly (one of the many benefits of good code architecture up front).
 
@@ -229,6 +233,22 @@ else if (plaintext[index] == '<') {
     append(Token_Seq, tokens, new_token);
 }
 ```
+Finally, for comments we can add a new branch:
+```c
+else if (plaintext[index] == ';') {
+    int strength = 0;
+    while (plaintext[index] == ';') {
+        strength++;
+        index++;
+    }
+    not_strong_enough:
+    while (plaintext[index] != ';') index++;
+    for (int i = 0; i<strength; i++) {
+        if (plaintext[index] != ';') goto not_strong_enough;
+        index++;
+    }
+}
+```
 And just like that our tokeniser is ready for all of the new features, without any significant architectural changes.
 
 Now we can look at the modified (but already existing) grammar symbols for the parser:
@@ -248,6 +268,10 @@ Now we can look at the modified (but already existing) grammar symbols for the p
               | <if_statement> | <body_statement>
               | <while_loop> | <break_statement>
               | <continue_statement> | <free_statement>;
+
+<proc_type> ::= "l_paren" (<type> | "keyword_void")
+                "l_paren" <declaration>* "r_paren"
+                "r_paren";
 
 <type> ::= <proc_type> | <base_type> | <pointer_type>;
 
@@ -360,7 +384,7 @@ Node_Option parse_statement(char_ptr_Seq* local_names, TypeList* local_types) {
         return output;
     } else idx = current_idx;
     char* name;
-    Type_Option var_type = parse_declaration(&name);
+    Type_Option var_type = parse_var_declaration(&name);
     if (var_type.present) {
         //we need to construct the variable here since parse_var_declaration is responsible for producing either a local var or a global var depending on where it is called from.
         append(char_ptr_Seq, *local_names, name);
@@ -415,7 +439,46 @@ if (output.present) {
 }else idx = current_idx;
 ```
 appears a lot throughout our codebase. This might be something you would want to factor out into a macro rather than having to type it in full every time. For clarity I won't but I encourage you to do so if you feel like it; making small changes to the codebase like that as you follow along will help cement your understanding even better.
+```c
+Type_Option parse_proc_type(char_ptr_Seq* arg_names) {
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
+    Type_Option return_type;
+    if (tokens.data[idx].kind == TOK_KEYWORD_VOID) {
+        idx++;
+        return_type = Just(Type_Option,
+            create_base_type(BTY_VOID)
+        );
+    } else {
+        return_type = parse_type();
+    }
+    Expect(Type_Option, return_type.present);
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_L_PAREN);
 
+    TypeList arg_types = empty_list;
+    //TypeList is a type provided by Libchibi to store lists of types
+    char_ptr_Seq arg_names_temp = {0};
+    while (tokens.data[idx].kind != TOK_R_PAREN) {
+        Type_Option arg_type;
+        char* arg_name;
+        arg_type = parse_declaration(&arg_name);
+        Expect(Type_Option, arg_type.present);
+        append(char_ptr_Seq, arg_names_temp, arg_name);
+        append_type(arg_types, arg_type.value);
+    }
+
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_R_PAREN);
+    Expect(Type_Option, tokens.data[idx++].kind == TOK_R_PAREN);
+
+    for (int i = 0; i < arg_names_temp.len; i++) {
+        append(char_ptr_Seq, *arg_names, arg_names_temp.data[i]);
+    }
+    //append to arg_names after all Expects so we know we won't fail
+    
+    Type output_type = create_function_type(return_type.value, arg_types);
+    Type_Option output = Just(Type_Option, output_type);
+    return output;
+}
+```
 ```c
 Type_Option parse_type() {
     int current_idx = idx;
@@ -525,7 +588,11 @@ Now all that is left is to implement the new symbols we introduced in chapter 7.
                | <lt_expression> | <le_expression>
                | <variable_literal> | <proc_call>
                | <pointer_value> | <deref_value>
-               | <allocation> | <sizeof>;
+               | <allocation> | <sizeof>
+               | <cast>;
+
+<cast> ::= "l_paren" "keyword_cast" <type> <expression>
+           "r_paren";
 
 <gt_expression> ::= "l_paren" "symbol_gt" <expression>
                     <expression> "r_paren";
@@ -869,8 +936,8 @@ Node_Option parse_continue_statement() {
 This means we can't use our Expect macro in parse_while_loop since we need to make sure we pop from these stacks before every return.
 ```c
 Node_Option parse_while_loop(char_ptr_Seq* local_names, TypeList* local_types) {
-    append(UniqueLabel_Seq, break_labels, (UniqueLabel)empty_label);
-    append(UniqueLabel_Seq, continue_labels, (UniqueLabel)empty_label);
+    append(UniqueLabel_Seq, break_labels, create_unique_label());
+    append(UniqueLabel_Seq, continue_labels, create_unique_label);
     bool succeeded = true;
     if (tokens.data[idx++].kind != TOK_L_PAREN) goto failed;
     if (tokens.data[idx++].kind != TOK_KEYWORD_WHILE) goto failed;
@@ -994,9 +1061,13 @@ Node_Option parse_var_assign_statement() {
         );
     }
     Node_Option output = Just(Node_Option,
-        create_ass_node(
-            var_node,
-            assignment.value,
+        create_expression_stmt_node(
+            create_ass_node(
+                var_node,
+                assignment.value,
+                0,
+                0
+            ),
             0,
             0
         )
@@ -1163,8 +1234,32 @@ Node_Option parse_expression() {
     if (output.present) {
         return output;
     } else idx = current_idx;
+    output = parse_cast();
+    if(output.present) {
+        return output;
+    } else idx = current_idx;
 
     return (Node_Option)Nothing;
+}
+```
+```c
+Node_Option parse_cast() {
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_L_PAREN);
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_KEYWORD_CAST);
+    Type_Option target_type = parse_type();
+    Expect(Node_Option, target_type.present);
+    Node_Option expression = parse_expression();
+    Expect(Node_Option, expression.present);
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
+
+    Node output_node = create_c_cast_node(
+        target_type.value,
+        expression.value,
+        0,
+        0
+    );
+    Node_Option output = Just(Node_Option, output_node);
+    return output;
 }
 ```
 ```c
@@ -1393,12 +1488,8 @@ Node_Option parse_shl_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
     
-    Type shl_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(shl_type))
-        shl_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_shl_node(shl_type, lhs.value, rhs.value, 0, 0)
+        create_shl_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1413,12 +1504,8 @@ Node_Option parse_shr_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type shr_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(shr_type))
-        shr_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_shr_node(shr_type, lhs.value, rhs.value, 0, 0)
+        create_shr_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1434,12 +1521,8 @@ Node_Option parse_bit_and_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type and_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(and_type))
-        and_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_and_node(and_type, lhs.value, rhs.value, 0, 0)
+        create_bit_and_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1455,12 +1538,8 @@ Node_Option parse_bit_or_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type or_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(or_type))
-        or_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_or_node(or_type, lhs.value, rhs.value, 0, 0)
+        create_bit_or_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1491,12 +1570,8 @@ Node_Option parse_bit_xor_expr() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type xor_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(xor_type))
-        xor_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_bit_xor_node(xor_type, lhs.value, rhs.value, 0, 0)
+        create_bit_xor_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1542,7 +1617,7 @@ Node_Option parse_log_not_expr() {
     Expect(Node_Option, tokens.data[idx++].kind == TOK_KEYWORD_NOT);
     Node_Option expression = parse_expression();
     Expect(Node_Option, expression.present);
-    Node_Option rhs = parse_expression();
+    Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
     Node_Option output = Just(Node_Option,
         create_not_node(expression.value, 0, 0)
@@ -1580,12 +1655,8 @@ Node_Option parse_sub_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type sub_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(sub_type))
-        sub_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_sub_node(sub_type, lhs.value, rhs.value, 0, 0)
+        create_sub_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1600,12 +1671,8 @@ Node_Option parse_mul_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type mul_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(mul_type))
-        mul_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_mul_node(mul_type, lhs.value, rhs.value, 0, 0)
+        create_mul_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1620,12 +1687,8 @@ Node_Option parse_div_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type div_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(div_type))
-        div_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_div_node(div_type, lhs.value, rhs.value, 0, 0)
+        create_div_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1640,12 +1703,8 @@ Node_Option parse_mod_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type mod_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(mod_type))
-        mod_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_mod_node(mod_type, lhs.value, rhs.value, 0, 0)
+        create_mod_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1660,12 +1719,8 @@ Node_Option parse_add_expression() {
     Expect(Node_Option, rhs.present);
     Expect(Node_Option, tokens.data[idx++].kind == TOK_R_PAREN);
 
-    Type add_type = get_expression_type(lhs.value);
-    Type rhs_type = get_expression_type(rhs.value);
-    if (get_type_size(rhs_type) > get_type_size(add_type))
-        add_type = rhs_type;
     Node_Option output = Just(Node_Option,
-        create_add_node(add_type, lhs.value, rhs.value, 0, 0)
+        create_add_node(lhs.value, rhs.value, 0, 0)
     );
     return output;
 }
@@ -1757,5 +1812,6 @@ For completeness's sake I should also show you Hello World:
     )
 )
 ```
+In the references for this chapter you will also find a program to simulate a pendulum that needs to be linked with [raylib](https://github.com/raysan5/raylib/releases/tag/5.5) and a version of the compiler code with a slightly modified main function to include the '-a' and '-c' compiler flags to just assemble into an object file or just compile into an assembly file respectively (which you currently need if you want to link with another C library or object). You will also find a test script test.chbl that just ensures the features not used in pendulum.chbl are all implemented correctly.
 
 In the next chapter we will layout the trajectory for the rest of the book and the path towards fleshing out our language into something that truly stands on it's own rather than being merely a lispy syntax over somewhat cut down C semantics.

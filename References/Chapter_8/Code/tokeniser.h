@@ -61,6 +61,7 @@ typedef enum {
     TOK_KEYWORD_OF,
     TOK_KEYWORD_FREE,
     TOK_KEYWORD_SIZEOF,
+    TOK_KEYWORD_CAST,
     TOK_L_PAREN,
     TOK_R_PAREN,
     TOK_SYMBOL_PLUS,
@@ -109,7 +110,7 @@ Token_Seq tokenise(char* plaintext) {
         "else", "while", "break", "continue", "log", "and",
         "or", "not", "xor", "bit", "shl", "shr", "void",
         "ptr", "to", "from", "allocate", "of", "free",
-        "sizeof"};
+        "sizeof", "cast"};
     TokenKind keyword_kinds[] = {TOK_KEYWORD_STRING,
         TOK_KEYWORD_F80, TOK_KEYWORD_F64,
         TOK_KEYWORD_F32, TOK_KEYWORD_U64,
@@ -131,7 +132,7 @@ Token_Seq tokenise(char* plaintext) {
         TOK_KEYWORD_PTR, TOK_KEYWORD_TO,
         TOK_KEYWORD_FROM, TOK_KEYWORD_ALLOCATE,
         TOK_KEYWORD_OF, TOK_KEYWORD_FREE,
-        TOK_KEYWORD_SIZEOF};
+        TOK_KEYWORD_SIZEOF, TOK_KEYWORD_CAST};
     
     while (plaintext[index] != '\0') {
         if (isalpha(plaintext[index])) {
@@ -269,6 +270,24 @@ Token_Seq tokenise(char* plaintext) {
             new_token.kind = TOK_STRING_LITERAL;
             new_token.data.string_literal = token_string.data;
             append(Token_Seq, tokens, new_token);
+        } else if (plaintext[index] == ';') {
+            int strength = 0;
+            while (plaintext[index] == ';') {
+                strength++;
+                index++;
+            }
+            not_strong_enough:
+            while (plaintext[index] != ';') {
+                if (plaintext[index] == '\0') {
+                    fprintf(stderr, "comment hit eof. Did you forget to terminate it?\n");
+                    exit(1);
+                }
+                index++;
+            }
+            for (int i = 0; i<strength; i++) {
+                if (plaintext[index] != ';') goto not_strong_enough;
+                index++;
+            }
         } else {
             fprintf(stderr, "Error: leading token character not recognised\n");
             exit(1);

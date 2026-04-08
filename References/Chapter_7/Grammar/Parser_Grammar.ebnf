@@ -91,7 +91,11 @@
                | <lt_expression> | <le_expression>
                | <variable_literal> | <proc_call>
                | <pointer_value> | <deref_value>
-               | <allocation> | <sizeof>;
+               | <allocation> | <sizeof>
+               | <cast>;
+
+<cast> ::= "l_paren" "keyword_cast" <type> <expression>
+           "r_paren";
 
 <gt_expression> ::= "l_paren" "symbol_gt" <expression>
                     <expression> "r_paren";
@@ -108,7 +112,7 @@
 <sizeof> ::= "l_paren" "keyword_sizeof" <type> "r_paren";
 
 <allocation> ::= "l_paren" "keyword_allocate" <expression>
-                 "keyword_of" <expression> "r_paren";
+                 "keyword_of" <type> "r_paren";
 
 <pointer_value> ::= "l_paren" "keyword_ptr" "keyword_to"
                     <expression> "r_paren";

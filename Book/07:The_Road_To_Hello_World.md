@@ -39,6 +39,8 @@ Well, we're obviously going to need a way to print to the console and for now I'
   *  pointers
   *  memory allocation
   *  sizeof
+  *  c-casts
+  *  comments
 
 That seems like a lot but as you'll see it's actually no more complex than what we have already built. In fact, that is the exact reason I've chosen to introduce so many new features at once; there's almost nothing here that you can't already do with what you've learned up to this point. Indeed, both this chapter and the next will kind of act as a 'stress-test' for everything you've learned so far.
 
@@ -632,6 +634,49 @@ Update our expression symbol:
 And add this symbol to our tokeniser grammar:
 ```EBNF
 <keyword_sizeof> ::= "sizeof";
+```
+\
+<br>
+### C-Casts
+```lisp
+(cast <type to cast to> <expression to cast>)
+```
+We can then add this symbol to our parser grammar:
+```EBNF
+<cast> ::= "l_paren" "keyword_cast" <type> <expression> "r_paren";
+```
+Update our expression symbol:
+```EBNF
+<expression> ::= <value_literal> | <add_expression>
+               | <sub_expression> | <mul_expression>
+               | <div_expression> | <mod_expression>
+               | <log_and_expr> | <log_or_expr>
+               | <log_not_expr> | <log_xor_expr>
+               | <bit_and_expr> | <bit_or_expr>
+               | <bit_not_expr> | <bit_xor_expr>
+               | <shl_expression> | <shr_expression>
+               | <eq_expression> | <neq_expression>
+               | <gt_expression> | <ge_expression>
+               | <lt_expression> | <le_expression>
+               | <variable_literal> | <proc_call>
+               | <pointer_value> | <deref_value>
+               | <allocation> | <sizeof>
+               | <cast>;
+```
+And add this symbol to our tokeniser grammar:
+```EBNF
+<keyword_cast> ::= "cast";
+```
+\
+<br>
+### Comments:
+```lisp
+; some comment here in between these semicolons ;
+;; the number of ;s represents the strength of comment ;;
+```
+We can then add this symbol to our tokeniser grammar:
+```
+<comment> ::= ";"* {any non-semicolon literal}* ";"*;
 ```
 \
 <br>
