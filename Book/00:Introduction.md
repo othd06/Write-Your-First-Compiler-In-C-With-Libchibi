@@ -2,7 +2,7 @@
 
 ### Overview:
 
-This ebook is a tutorial on building a language parser and compiler for the first time using the Libchibi backend library developed by myself specifically to facilitate making this process as easy and beginner friendly as possible.
+This ebook is a tutorial on building a language parser and compiler for the first time using the Libchibi backend library developed by myself specifically to facilitate making this process as easy and beginner friendly as possible. It also covers the process of designing a language iteratively throughout the book with the hopes of guiding you through using the tools and processes to design your own languages afterwards as well.
 
 Specifically, we will be building a language tokeniser (often called a lexer) and parser (you will learn what this means shortly) and largely relying upon Libchibi to act as a backend to turn this code into a compiled object file which can be linked into an executable.
 

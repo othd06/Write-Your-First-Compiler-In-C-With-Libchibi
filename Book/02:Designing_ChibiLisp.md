@@ -134,11 +134,15 @@ We now have a complete grammar that can represent the core set of tokens we need
 
 ### Finishing Our Grammar:
 
+#### Overview:
+
 The last thing we need is a grammar for the rest of our syntax. We want something quite specific out of our grammar and that is because we want the grammar to act as a template for our parser (remember chapter 0) to transform the tokens from before into that AST tree structure we described.
 
 We will design our grammar from the top down starting with a single symbol that represents our entire program and work down defining our symbols. Another concern, of course, is that our example from earlier was a very minimal example so we want to keep our grammar extensible to the features we will be adding later. This means we'll have quite a few symbols for the moment that are just defined as equivalent to some other symbol but that will, over time, accumulate more alternatives.
 
-We know we want out program to consist of multiple top-level objects, and that one of the things those objects can be is a definition so we can start there with our grammar:
+#### Program and Objects
+
+We know we want our program to consist of multiple top-level objects, and that one of the things those objects can be is a definition so we can start there with our grammar:
 ```EBNF
 <program> ::= <object>*;
 
@@ -156,6 +160,8 @@ And, in fact, we just covered what is in proc_definition_inner as well:
 ```
 With the identifier being the name and the proc_type and proc_body being symbols we have yet to define.
 
+#### Proc Bodies and Proc Types
+
 For our body, we saw that we wanted a syntax that had the word body and then some statements (for now we only have return but obviously there are plenty more we will want later), again, surrounded by brackets:
 ```EBNF
 <proc_body> ::= <l_paren> <keyword_body> <statement>*
@@ -166,9 +172,12 @@ And for the procedure type we want the return type then, in brackets, a list of 
 <proc_type> ::= <l_paren> <type> <l_paren> <declaration>*
                 <r_paren> <r_paren>;
 ```
+
+#### Statements and Types:
+
 If we go back to the proc_body, we can also define our statement symbol. For now, this is easy as there is only a return statement which itself contains only the word return and some expression to be returned all in parens:
 ```EBNF
-<statement> ::= <return_statement>
+<statement> ::= <return_statement>;
 
 <return_statement> ::= <l_paren> <keyword_return> <expression>
                 <r_paren>;
@@ -184,6 +193,9 @@ For the return type of the proc_type we can obviously use one of our base types 
                 <keyword_f32> | <keyword_f64> | <keyword_f80> |
                 <keyword_string>;
 ```
+
+#### Declarations and Expressions:
+
 Which leaves now only the declaration and the expression left. For declarations we need only the type (in this case we can only declare base types as arguments for now) and an identifier for the name of the parameter all wrapped in parens:
 ```EBNF
 <declaration> ::= <l_paren> <base_type> <identifier> <r_paren>;
@@ -207,6 +219,8 @@ And for an expression we currently only have literal values. However, as you saw
 ```
 Note that we don't simply use value_literal directly as this would cause problems once we want to start passing things like additions such as 5+2 into function arguments rather than literals directly.
 
+#### Closing Thoughts:
+
 That is actually all of the grammar we need so far to parse the simple program from above:
 ```lisp
 (define proc (main (i32 ()) (body (return (i32 69)))))
@@ -221,6 +235,6 @@ Note as well how this separation gave us clear benefits in terms of being able t
 
 This isn't the only advantage of tokenisation. Tokenisation can also play a role in making our grammar as close to context-free as possible as well. Remember how I said that [Python](https://www.python.org/)'s indentation-based scoping isn't strictly context free? Well we can make it context-free using the tokeniser by, instead of emitting a token for every level of indentation at the start of the line, only emitting a token every time the indentation increases or decreases. In fact, such a system would make those tokens identical to the ones representing, say, curly braces in C-like languages. It also allows us to make decisions between keywords and mere identifiers which would otherwise be ambiguous, or to evaluate numeric and decimal literals so the parser can see their value as a number rather than simply a string of digits (something we obviously explored earlier without pointing out that it was a specific advantage of tokenisation). So you can see how as the language gets more complex it becomes really powerful to have basic tokens representing small bits of syntactic meaning that are generated from the plaintext and can effectively act as the terminals for our more complex parser.
 
-Before finishing up, and I promise we're about too, I would also like to bring up a point I made last chapter. Remember I said our example grammar was likely not how you would go about designing the grammar for a system of equations. Hopefully you can start to see why looking at the grammar we defined for our syntax here and the relationship we tried to build between it and the AST. When we covered an example of a mathematical AST in chapter 0 we saw how the nodes represented the structure of our BIDMAS rules so we would likely do the same thing in our grammar. Instead of simply defining our expression as a list of unaries with ops in between them we would likely define a set of different symbols to represent exponentiation, multiplication and division, addition and subtraction, unaries, then individual numbers and bracketed expressions. Hopefully you can see the analogy between that and the way we are defining our grammar here to mirror the semantics of our language as it is and is likely to become. If not, don't worry, seeing it in practice over the next few chapters will build that understanding. 
+Before finishing up, and I promise we're about to, I would also like to bring up a point I made last chapter. Remember I said our example grammar was likely not how you would go about designing the grammar for a system of equations. Hopefully you can start to see why looking at the grammar we defined for our syntax here and the relationship we tried to build between it and the AST. When we covered an example of a mathematical AST in chapter 0 we saw how the nodes represented the structure of our BIDMAS rules so we would likely do the same thing in our grammar. Instead of simply defining our expression as a list of unaries with ops in between them we would likely define a set of different symbols to represent exponentiation, multiplication and division, addition and subtraction, unaries, then individual numbers and bracketed expressions. Hopefully you can see the analogy between that and the way we are defining our grammar here to mirror the semantics of our language as it is and is likely to become. If not, don't worry, seeing it in practice over the next few chapters will build that understanding. 
 
 In the next chapter we will be focussing on writing our tokeniser to turn a plaintext input file into a stream of tokens that we can hand to the parser.
