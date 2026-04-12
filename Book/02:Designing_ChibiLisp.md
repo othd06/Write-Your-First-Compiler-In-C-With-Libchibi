@@ -200,7 +200,7 @@ Which leaves now only the declaration and the expression left. For declarations 
 ```EBNF
 <declaration> ::= <l_paren> <base_type> <identifier> <r_paren>;
 ```
-And for an expression we currently only have literal values. However, as you saw our token literals don't match up with the types we defined (for example, having a single integer literal but many integer types from u8 through i64). The example sample therefore shows that our literal must have the type of the literal as well as the literal itself enclosed in brackets (int this case '(i32 69)') so our expression and value literal symbols would look something like this@
+And for an expression we currently only have literal values. However, as you saw our token literals don't match up with the types we defined (for example, having a single integer literal but many integer types from u8 through i64). The example sample therefore shows that our literal must have the type of the literal as well as the literal itself enclosed in brackets (int this case '(i32 69)') so our expression and value literal symbols would look something like this:
 ```EBNF
 <expression> ::= <value_literal>;
 
