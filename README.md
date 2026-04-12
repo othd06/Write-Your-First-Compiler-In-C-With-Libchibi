@@ -1,4 +1,4 @@
-A book to teach you how to write your first compiler with the [Libchibi](https://github.com/othd06/libchibi) library.
+A book to teach you how to write your first compiler in C with the [Libchibi](https://github.com/othd06/libchibi) library.
 
 ### [Table Of Contents](Book/Contents.md)
 
