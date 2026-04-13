@@ -1,3 +1,10 @@
+
+<div>
+<small>
+  Write Your First Compiler In C With Libchibi<br>
+  <em>Part 2: Making ChibiLisp Useful</em>
+</small>
+</div>
 <h1 align=center>Chapter 07: Designing Our Featureset</h1>
 
 ### Overview:
