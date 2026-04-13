@@ -20,7 +20,7 @@ Additionally, I recommend looking over the [include header](https://github.com/o
 
 Before we begin, it's worth getting an overview of what a compiler looks like. This is generally a pretty standardised pipeline of transformations regardless of the compiler. The typical process tends to be as follows (don't worry, I will explain them all in detail just below):
 ```
-plaintext -> tokenisation -> parsing to an AST -> lowering to IR -> generating assembly
+plaintext -> tokenisation -> parsing to an AST (defined below) -> lowering to IR -> generating assembly
 ```
 
 Oftentimes the final stage will be handled by some other backend such as [LLVM](https://releases.llvm.org/), [Cranelift](https://cranelift.dev/), or [QBE](https://c9x.me/compile/) which will typically perform certain optimisations to improve the speed of your compiled code as well as providing a generic way to compile for multiple different architectures and operating systems. I highly recommend looking into them if you want to get more of an insight into how 'real' compilers operate in the wild. I particularly recommend looking into QBE as a sort of intermediate stepping stone of complexity between what we will do in this book and the much greater complexity of industrial-grade backends like Cranelift and, especially, LLVM.

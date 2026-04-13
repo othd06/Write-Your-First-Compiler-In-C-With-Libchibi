@@ -10,7 +10,7 @@
   *  [Chapter 05: Writing Our First Parser](05-Writing_Our_First_Parser.md)
   *  [Chapter 06: Compiling Our First Program](06-Compiling_Our_First_Program.md)
 ### Part 2: Making ChibiLisp Useful
-  *  [Chapter 07: Designing Our Featureset](07-Designing_Our_Roadmap.md)
+  *  [Chapter 07: Designing Our Featureset](07-Designing_Our_Featureset.md)
   *  [Chapter 08: Expanding Our Grammar](08-Designing_Our_Syntax.md)
   *  [Chapter 09: Implementing Our Design](09-Implementing_Our_Design.md)
   *  [Chapter 10: Testing ChibiLisp](10-Testing_ChibiLisp.md)
