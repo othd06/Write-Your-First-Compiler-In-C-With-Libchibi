@@ -11,8 +11,20 @@ This repository contains both written content and code examples. The following l
 
    You may use the code and grammar examples under either licence.
 
-Summary:
-- Text → CC BY-SA 4.0 only
-- Code/Grammar → CC BY-SA 4.0 OR MIT (your choice)
+3. All code in /mdBook/theme:
+   Licenced under the BSD-3-Clause Licence
 
-See LICENCE-CC-BY-SA.txt and LICENCE-MIT.txt for full licence texts.
+4. Generated output (such as produced by "mdbook build" in mdBook/book):
+   The generated output contains a combination of materials including:
+     - material under licences specified above
+     - material provided by mdbook which is licenced under the MPL-2.0 licence.
+   The licences of individual materials remain unchanged in the generated output.
+
+Summary:
+   - Text → CC BY-SA 4.0 only
+   - Code/Grammar → CC BY-SA 4.0 OR MIT (your choice)
+   - /mdBook/theme → BSD-3
+   - Generated Output: unchanged from the material used to generate it
+
+
+See LICENCE-CC-BY-SA.txt, LICENCE-MIT.txt, MPL-2.0.txt, and LICENCE-BSD3.txt for full licence texts.
